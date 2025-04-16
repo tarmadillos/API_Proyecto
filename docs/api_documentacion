@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación de la API - Sistema de Gestión de Inventario y Facturación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        h1 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        h2 {
+            border-bottom: 1px solid #666;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #666;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>Documentación de la API - Sistema de Gestión de Inventario y Facturación</h1>
+
+    <h2>Descripción General de la API</h2>
+    <p>
+        Esta API RESTful permite la gestión de inventarios y facturación para un sistema de tienda. Proporciona endpoints para manejar categorías, productos, clientes, ventas, inventarios y precios. Está diseñada para ser utilizada por un frontend web (como el desarrollado en <code>stockgo-web/</code>) y soporta operaciones CRUD (Crear, Leer, Actualizar, Eliminar) en las entidades principales.
+    </p>
+    <p>
+        La API está alojada localmente en <code>http://apirestphp.test/api</code> (usando Laragon) y está construida con PHP, utilizando MySQL como base de datos y JWT para autenticación.
+    </p>
+
+    <h2>Esquema de Autenticación</h2>
+    <p>
+        La API utiliza un esquema de autenticación basado en <strong>JWT (JSON Web Tokens)</strong>. Los usuarios deben autenticarse enviando credenciales para obtener un token, que luego se incluye en las solicitudes a endpoints protegidos.
+    </p>
+    <ul>
+        <li><strong>Obtener el Token:</strong> Usa el endpoint <code>/auth/login</code> con las credenciales <code>stockgo_user</code> y <code>mi_clave_secreta_123</code>.</li>
+        <li><strong>Usar el Token:</strong> Incluye el token en el encabezado <code>Authorization: Bearer &lt;token&gt;</code> para acceder a los endpoints protegidos.</li>
+    </ul>
+
+    <h2>Endpoints de la API</h2>
+
+    <h3>Autenticación</h3>
+    <h4>POST /auth/login</h4>
+    <p>Autentica al usuario y devuelve un token JWT.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/auth/login</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "username": "stockgo_user",
+    "password": "mi_clave_secreta_123"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Autenticación exitosa<br>
+                401: Credenciales inválidas
+            </td>
+        </tr>
+    </table>
+
+    <h3>Categorías</h3>
+    <h4>POST /categorias</h4>
+    <p>Crea una nueva categoría.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/categorias</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "Nombre": "Electrónicos",
+    "Descripción": "Productos electrónicos"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Categoría creada",
+    "id": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                201: Categoría creada<br>
+                400: Error al crear categoría<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /categorias</h4>
+    <p>Obtiene todas las categorías.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/categorias</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+[
+    {
+        "ID_Categoria": 1,
+        "Nombre": "Electrónicos",
+        "Descripción": "Productos electrónicos"
+    },
+    ...
+]
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Lista de categorías<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /categorias/{id}</h4>
+    <p>Obtiene una categoría específica por ID.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/categorias/1</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>id (en la URI)</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "ID_Categoria": 1,
+    "Nombre": "Electrónicos",
+    "Descripción": "Productos electrónicos"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Categoría encontrada<br>
+                404: Categoría no encontrada<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>PUT /categorias/{id}</h4>
+    <p>Actualiza una categoría existente.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>PUT</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/categorias/1</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>id (en la URI)</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "Nombre": "Electrónicos Actualizados",
+    "Descripción": "Productos electrónicos actualizados"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Categoría actualizada"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Categoría actualizada<br>
+                400: Error al actualizar categoría<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>DELETE /categorias/{id}</h4>
+    <p>Elimina una categoría existente.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>DELETE</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/categorias/1</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>id (en la URI)</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                204: Categoría eliminada<br>
+                404: Categoría no encontrada<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h3>Productos</h3>
+    <h4>POST /productos</h4>
+    <p>Crea un nuevo producto.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/productos</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "Nombre": "Laptop",
+    "Precio": 1000.00,
+    "ID_Categoría": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Producto creado",
+    "id": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                201: Producto creado<br>
+                400: Error al crear producto<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /productos</h4>
+    <p>Obtiene todos los productos.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/productos</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+[
+    {
+        "ID_Producto": 1,
+        "Nombre": "Laptop",
+        "Precio": 1000.00,
+        "ID_Categoría": 1
+    },
+    ...
+]
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Lista de productos<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /productos/{id}</h4>
+    <p>Obtiene un producto específico por ID.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/productos/1</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>id (en la URI)</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "ID_Producto": 1,
+    "Nombre": "Laptop",
+    "Precio": 1000.00,
+    "ID_Categoría": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Producto encontrado<br>
+                404: Producto no encontrado<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>PUT /productos/{id}</h4>
+    <p>Actualiza un producto existente.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>PUT</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/productos/1</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>id (en la URI)</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "Nombre": "Laptop Actualizada",
+    "Precio": 1200.00,
+    "ID_Categoría": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Producto actualizado"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Producto actualizado<br>
+                400: Error al actualizar producto<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>DELETE /productos/{id}</h4>
+    <p>Elimina un producto existente.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>DELETE</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/productos/1</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>id (en la URI)</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                204: Producto eliminado<br>
+                404: Producto no encontrado<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h3>Ventas</h3>
+    <h4>POST /ventas</h4>
+    <p>Registra una nueva venta.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/ventas</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "ID_Cliente": 1,
+    "Fecha": "2025-04-15",
+    "Total": 1500.00,
+    "Detalles": [
+        {
+            "ID_Producto": 1,
+            "Cantidad": 2,
+            "Precio_Unitario": 750.00
+        }
+    ]
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Venta registrada",
+    "id": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                201: Venta registrada<br>
+                400: Error al registrar venta<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /ventas</h4>
+    <p>Obtiene todas las ventas.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/ventas</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+[
+    {
+        "ID_Venta": 1,
+        "ID_Cliente": 1,
+        "Fecha": "2025-04-15",
+        "Total": 1500.00
+    },
+    ...
+]
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Lista de ventas<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /ventas/{id}</h4>
+    <p>Obtiene una venta específica por ID.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/ventas/1</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>id (en la URI)</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "ID_Venta": 1,
+    "ID_Cliente": 1,
+    "Fecha": "2025-04-15",
+    "Total": 1500.00,
+    "Detalles": [
+        {
+            "ID_Detalle": 1,
+            "ID_Producto": 1,
+            "Cantidad": 2,
+            "Precio_Unitario": 750.00
+        }
+    ]
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Venta encontrada<br>
+                404: Venta no encontrada<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h3>Clientes</h3>
+    <h4>POST /clientes</h4>
+    <p>Crea un nuevo cliente.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/clientes</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "Nombre": "Juan Pérez",
+    "Email": "juan@example.com",
+    "Teléfono": "1234567890"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Cliente creado",
+    "id": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                201: Cliente creado<br>
+                400: Error al crear cliente<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /clientes</h4>
+    <p>Obtiene todos los clientes.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/clientes</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+[
+    {
+        "ID_Cliente": 1,
+        "Nombre": "Juan Pérez",
+        "Email": "juan@example.com",
+        "Teléfono": "1234567890"
+    },
+    ...
+]
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Lista de clientes<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h3>Inventarios</h3>
+    <h4>POST /inventarios</h4>
+    <p>Registra un nuevo inventario.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/inventarios</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "ID_Producto": 1,
+    "Cantidad": 50,
+    "Fecha_Actualización": "2025-04-15"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Inventario creado",
+    "id": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                201: Inventario creado<br>
+                400: Error al crear inventario<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /inventarios</h4>
+    <p>Obtiene todos los inventarios.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/inventarios</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+[
+    {
+        "ID_Inventario": 1,
+        "ID_Producto": 1,
+        "Cantidad": 50,
+        "Fecha_Actualización": "2025-04-15"
+    },
+    ...
+]
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Lista de inventarios<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h3>Precios</h3>
+    <h4>POST /precios</h4>
+    <p>Registra un nuevo precio para un producto.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/precios</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>
+                <pre>
+{
+    "ID_Producto": 1,
+    "Precio": 1200.00,
+    "Fecha_Inicio": "2025-04-15"
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+{
+    "mensaje": "Precio creado",
+    "id": 1
+}
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                201: Precio creado<br>
+                400: Error al crear precio<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h4>GET /precios</h4>
+    <p>Obtiene todos los precios.</p>
+    <table>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+        <tr>
+            <td><strong>Método</strong></td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td><strong>URI</strong></td>
+            <td>/precios</td>
+        </tr>
+        <tr>
+            <td><strong>Parámetros</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Request Body</strong></td>
+            <td>Ninguno</td>
+        </tr>
+        <tr>
+            <td><strong>Response Body (Éxito)</strong></td>
+            <td>
+                <pre>
+[
+    {
+        "ID_Precio": 1,
+        "ID_Producto": 1,
+        "Precio": 1200.00,
+        "Fecha_Inicio": "2025-04-15"
+    },
+    ...
+]
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Códigos de Estado</strong></td>
+            <td>
+                200: Lista de precios<br>
+                401: Token inválido o no proporcionado
+            </td>
+        </tr>
+    </table>
+
+    <h2>Ejemplos de Uso</h2>
+
+    <h3>Ejemplo 1: Autenticación (cURL)</h3>
+    <pre>
+curl -X POST http://apirestphp.test/api/auth/login \
+-H "Content-Type: application/json" \
+-d '{"username":"stockgo_user","password":"mi_clave_secreta_123"}'
+    </pre>
+    <p><strong>Respuesta:</strong></p>
+    <pre>
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+    </pre>
+
+    <h3>Ejemplo 2: Obtener Productos (JavaScript)</h3>
+    <pre>
+const token = "tu-token-aquí";
+fetch('http://apirestphp.test/api/productos', {
+    method: 'GET',
+    headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    }
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Error:', error));
+    </pre>
+    <p><strong>Respuesta:</strong></p>
+    <pre>
+[
+    {
+        "ID_Producto": 1,
+        "Nombre": "Laptop",
+        "Precio": 1000.00,
+        "ID_Categoría": 1
+    },
+    ...
+]
+    </pre>
+
+    <h3>Ejemplo 3: Crear una Venta (cURL)</h3>
+    <pre>
+curl -X POST http://apirestphp.test/api/ventas \
+-H "Authorization: Bearer tu-token-aquí" \
+-H "Content-Type: application/json" \
+-d '{
+    "ID_Cliente": 1,
+    "Fecha": "2025-04-15",
+    "Total": 1500.00,
+    "Detalles": [
+        {
+            "ID_Producto": 1,
+            "Cantidad": 2,
+            "Precio_Unitario": 750.00
+        }
+    ]
+}'
+    </pre>
+    <p><strong>Respuesta:</strong></p>
+    <pre>
+{
+    "mensaje": "Venta registrada",
+    "id": 1
+}
+    </pre>
+
+    <h2>Errores Comunes</h2>
+    <table>
+        <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Solución</th>
+        </tr>
+        <tr>
+            <td>401 Unauthorized</td>
+            <td>Token de autenticación requerido o inválido</td>
+            <td>
+                Asegúrate de incluir el token en el encabezado <code>Authorization: Bearer &lt;token&gt;</code>.<br>
+                Verifica que el token no haya expirado (válido por 1 hora).<br>
+                Si no tienes un token, autentícate con <code>/auth/login</code>.
+            </td>
+        </tr>
+        <tr>
+            <td>404 Not Found</td>
+            <td>Ruta no encontrada o recurso no existe</td>
+            <td>
+                Verifica la URI (por ejemplo, <code>/productos/999</code> puede no existir).<br>
+                Asegúrate de que el endpoint esté correctamente escrito.
+            </td>
+        </tr>
+        <tr>
+            <td>400 Bad Request</td>
+            <td>Error en los datos enviados</td>
+            <td>
+                Revisa el cuerpo de la solicitud (JSON malformado o parámetros faltantes).<br>
+                Ejemplo: En <code>/categorias</code>, asegúrate de enviar <code>Nombre</code> y <code>Descripción</code>.
+            </td>
+        </tr>
+        <tr>
+            <td>500 Internal Server Error</td>
+            <td>Error en el servidor</td>
+            <td>
+                Habilita los errores en PHP (<code>display_errors = On</code>) para ver el detalle.<br>
+                Posibles causas: conexión a la base de datos fallida, archivo <code>vendor/autoload.php</code> no encontrado.
+            </td>
+        </tr>
+        <tr>
+            <td>CORS Error</td>
+            <td>El navegador bloquea la solicitud</td>
+            <td>
+                Asegúrate de que <code>api/index.php</code> tenga el encabezado <code>Access-Control-Allow-Origin: *</code>.<br>
+                Verifica que la URL en el frontend (<code>scripts.js</code>) sea correcta (<code>http://apirestphp.test/api</code>).
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

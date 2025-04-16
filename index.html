@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockGo - Inventarios y Facturacion</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>StockGo - Inventarios</h1>
+        <p>¡Bienvenido! Inicia sesión para gestionar tu inventario y ventas.</p>
+
+        <!-- Sección para iniciar sesión -->
+        <div id="login-section">
+            <h2>Iniciar Sesión</h2>
+            <input type="text" id="username" placeholder="Usuario" value="">
+            <input type="password" id="password" placeholder="Contraseña" value="">
+            <button onclick="login()">Entrar</button>
+            <p id="login-message"></p>
+        </div>
+
+        <!-- Sección principal (se muestra después de iniciar sesión) -->
+        <div id="main-section" style="display: none;">
+            <!-- Sección de productos -->
+            <h2>Mis Productos</h2>
+            <button onclick="fetchProducts()">Ver Productos</button>
+            <ul id="products-list"></ul>
+
+            <!-- Sección de ventas -->
+            <h2>Mis Ventas</h2>
+            <button onclick="fetchSales()">Ver Ventas</button>
+            <ul id="sales-list"></ul>
+
+            <!-- Botón para cerrar sesión -->
+            <button onclick="logout()" class="logout-btn">Salir</button>
+        </div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
